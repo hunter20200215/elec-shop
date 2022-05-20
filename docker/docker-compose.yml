@@ -1,0 +1,42 @@
+version: "3.8"
+services:
+  postgres:
+    image: postgres
+    restart: always
+    container_name: postgres
+    environment:
+      POSTGRES_PASSWORD: kogctszs
+      POSTGRES_USER: postgres
+      POSTGRES_DB: genesis-bricks
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - defaultnetwork
+  web:
+    build: builds/php-apache2
+    container_name: webserver
+    restart: always
+    volumes:
+      - ../:/var/www/httpd/
+      - /etc/letsencrypt:/etc/letsencrypt
+    ports:
+      - 80:80
+      - 443:443
+    depends_on:
+      - postgres
+      - redis
+    links:
+      - postgres:postgres
+      - redis:redis
+    networks:
+      - defaultnetwork
+  redis:
+    image: redis:5.0.7
+    container_name: redis
+    restart: always
+    networks:
+      - defaultnetwork
+networks:
+  defaultnetwork:
+volumes:
+  pgdata:
